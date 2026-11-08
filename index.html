@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你最像红楼梦里的谁</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'honglou-red': '#8B2323',
+                        'honglou-gold': '#B8860B',
+                        'honglou-beige': '#F5EFE6',
+                        'honglou-ink': '#2C2C2C',
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif SC"', 'SimSun', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .paper-bg {
+                background-color: #F5EFE6;
+                background-image: 
+                    radial-gradient(#E8DCC8 1px, transparent 1px),
+                    radial-gradient(#E8DCC8 1px, transparent 1px);
+                background-size: 20px 20px;
+                background-position: 0 0, 10px 10px;
+            }
+            .option-hover {
+                transition: all 0.3s ease;
+            }
+            .option-hover:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(139, 35, 35, 0.15);
+            }
+            .fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+    </style>
+</head>
+<body class="font-serif paper-bg min-h-screen text-honglou-ink">
+    <div class="max-w-xl mx-auto px-4 py-8 min-h-screen flex flex-col justify-center">
+        
+        <!-- 开始页 -->
+        <div id="start-screen" class="fade-in text-center">
+            <div class="mb-8">
+                <div class="text-honglou-red text-4xl font-bold mb-2 tracking-widest">红楼人设</div>
+                <div class="text-honglou-gold text-lg tracking-wider">你最像金陵十二钗中的谁</div>
+            </div>
+            
+            <div class="bg-white/70 backdrop-blur rounded-lg p-6 mb-8 shadow-md border border-honglou-red/10">
+                <p class="leading-relaxed mb-4">
+                    满纸荒唐言，一把辛酸泪。<br>
+                    都云作者痴，谁解其中味。
+                </p>
+                <p class="text-sm text-gray-600">
+                    十五道题目，深度剖析你的性格底色<br>
+                    对应红楼梦中哪位人物的风骨与命运
+                </p>
+            </div>
+
+            <button onclick="startQuiz()" 
+                class="bg-honglou-red text-white px-10 py-3 rounded-full text-lg tracking-wider hover:bg-honglou-red/90 transition-all shadow-lg hover:shadow-xl">
+                开始测试
+            </button>
+            
+            <p class="mt-6 text-xs text-gray-500">娱乐向测试 · 仅供参考</p>
+        </div>
+
+        <!-- 答题页 -->
+        <div id="quiz-screen" class="hidden fade-in">
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-honglou-red mb-2">
+                    <span>第 <span id="current-num">1</span> / 15 题</span>
+                    <span id="progress-text">7%</span>
+                </div>
+                <div class="w-full bg-honglou-beige rounded-full h-1.5">
+                    <div id="progress-bar" class="bg-honglou-red h-1.5 rounded-full transition-all duration-300" style="width: 6.67%"></div>
+                </div>
+            </div>
+
+            <div class="bg-white/70 backdrop-blur rounded-lg p-6 mb-6 shadow-md border border-honglou-red/10">
+                <h3 id="question-text" class="text-xl font-semibold mb-6 leading-relaxed text-center">
+                    题目加载中...
+                </h3>
+                
+                <div id="options-container" class="space-y-3">
+                    <!-- 选项动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果页 -->
+        <div id="result-screen" class="hidden fade-in text-center">
+            <div class="mb-4 text-honglou-gold tracking-widest">你的红楼人设是</div>
+            
+            <div class="mb-6">
+                <h2 id="result-name" class="text-5xl font-bold text-honglou-red mb-3 tracking-widest text-shadow">
+                    林黛玉
+                </h2>
+                <p id="result-poem" class="text-lg italic text-honglou-ink/80 leading-relaxed">
+                    娴静时如姣花照水，行动处似弱柳扶风
+                </p>
+            </div>
+
+            <div class="bg-white/70 backdrop-blur rounded-lg p-6 mb-6 shadow-md border border-honglou-red/10 text-left">
+                <h4 class="font-semibold text-honglou-red mb-3 text-center">人物解析</h4>
+                <p id="result-desc" class="leading-relaxed text-gray-700">
+                    你敏感细腻，才情出众，有着极高的精神追求。外表清冷孤傲，内心却柔软深情，对认定的人倾尽真心。你不喜世俗客套，追求纯粹的知己之情，看似柔弱实则风骨凛然，宁为玉碎不为瓦全。
+                </p>
+                
+                <div class="mt-5 pt-4 border-t border-honglou-red/10">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">匹配度</span>
+                        <span id="match-score" class="font-semibold text-honglou-red">92%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 justify-center flex-wrap">
+                <button onclick="restartQuiz()" 
+                    class="bg-white border border-honglou-red text-honglou-red px-8 py-2.5 rounded-full hover:bg-honglou-red/5 transition-all">
+                    再测一次
+                </button>
+                <button onclick="shareResult()" 
+                    class="bg-honglou-red text-white px-8 py-2.5 rounded-full hover:bg-honglou-red/90 transition-all">
+                    分享结果
+                </button>
+            </div>
+            
+            <p class="mt-8 text-xs text-gray-500">本测试仅供娱乐参考</p>
+        </div>
+
+    </div>
+
+    <script>
+        // 题库：15道题，每题4个选项，对应不同人物
+        const questions = [
+            {
+                question: "面对别人的无心冒犯，你通常会怎么做？",
+                options: [
+                    { text: "记在心里，暗自难过，久久不能释怀", character: "daiyu" },
+                    { text: "一笑而过，根本不往心里去", character: "xiangyun" },
+                    { text: "委婉点破，既不伤和气也不吃亏", character: "baochai" },
+                    { text: "当场怼回去，绝不受半分委屈", character: "xifeng" }
+                ]
+            },
+            {
+                question: "朋友聚会中，你通常是什么角色？",
+                options: [
+                    { text: "安静坐在角落，只和熟的人说话", character: "miaoyu" },
+                    { text: "活跃气氛的开心果，有我在不冷场", character: "xiangyun" },
+                    { text: "周到照顾每个人，协调全场节奏", character: "baochai" },
+                    { text: "主导话题，大家都听我安排", character: "tanchun" }
+                ]
+            },
+            {
+                question: "交给你一件棘手的事，你第一反应是？",
+                options: [
+                    { text: "担心做不好，焦虑很久", character: "daiyu" },
+                    { text: "先接下来再说，走一步看一步", character: "baoyu" },
+                    { text: "立刻理清头绪，制定方案落地", character: "xifeng" },
+                    { text: "先分清权责，不该我担的绝不背锅", character: "tanchun" }
+                ]
+            },
+            {
+                question: "你更向往哪种生活状态？",
+                options: [
+                    { text: "闲云野鹤，一人一屋诗书相伴", character: "miaoyu" },
+                    { text: "富贵安稳，家人和睦现世安稳", character: "baochai" },
+                    { text: "自由自在，随性洒脱无拘无束", character: "xiangyun" },
+                    { text: "手握实权，凭能力闯出一片天", character: "xifeng" }
+                ]
+            },
+            {
+                question: "和恋人闹矛盾，你通常会？",
+                options: [
+                    { text: "等着对方来哄，不然就一直赌气", character: "daiyu" },
+                    { text: "冷静沟通，把问题说开解决掉", character: "baochai" },
+                    { text: "转头就忘，吵完很快和好", character: "xiangyun" },
+                    { text: "占据上风，必须对方先低头", character: "xifeng" }
+                ]
+            },
+            {
+                question: "职场/班级里，你更像哪种人？",
+                options: [
+                    { text: "低调做事，不争不抢但心里有数", character: "xiren" },
+                    { text: "能力出众，敢说敢做的实力派", character: "tanchun" },
+                    { text: "人缘极好，和谁都能处得来", character: "baochai" },
+                    { text: "随性散漫，不喜欢被规矩束缚", character: "baoyu" }
+                ]
+            },
+            {
+                question: "你对金钱的态度是？",
+                options: [
+                    { text: "精打细算，每一笔都要有规划", character: "xifeng" },
+                    { text: "够用就好，不太在意身外之物", character: "daiyu" },
+                    { text: "适度储蓄，兼顾体面与安稳", character: "baochai" },
+                    { text: "及时行乐，有钱就花不委屈自己", character: "xiangyun" }
+                ]
+            },
+            {
+                question: "你眼中的理想知己，最重要的特质是？",
+                options: [
+                    { text: "灵魂共鸣，懂我未说出口的话", character: "daiyu" },
+                    { text: "温柔包容，能一直陪伴在身边", character: "xiren" },
+                    { text: "坦荡真诚，不用拐弯抹角", character: "xiangyun" },
+                    { text: "势均力敌，能一起成长进步", character: "tanchun" }
+                ]
+            },
+            {
+                question: "遇到重大挫折时，你会如何应对？",
+                options: [
+                    { text: "独自消化，不愿把脆弱示人", character: "miaoyu" },
+                    { text: "找朋友倾诉，发泄完就好了", character: "xiangyun" },
+                    { text: "冷静分析，想办法解决问题", character: "tanchun" },
+                    { text: "表面强撑，背地里偷偷难过", character: "daiyu" }
+                ]
+            },
+            {
+                question: "在集体中做决策，你倾向于？",
+                options: [
+                    { text: "顺从多数意见，不想起争执", character: "xiren" },
+                    { text: "有理有据，说服大家听我的", character: "xifeng" },
+                    { text: "尊重每个人，尽量达成共识", character: "baochai" },
+                    { text: "无所谓，怎样都行我都可以", character: "baoyu" }
+                ]
+            },
+            {
+                question: "你对「规矩和礼数」的看法是？",
+                options: [
+                    { text: "繁文缛节太多，让人束缚", character: "baoyu" },
+                    { text: "必要的规矩，是体面的根基", character: "baochai" },
+                    { text: "规矩是给普通人定的，强者制定规则", character: "xifeng" },
+                    { text: "内心自有准则，不在乎世俗形式", character: "miaoyu" }
+                ]
+            },
+            {
+                question: "闲暇时光，你更愿意做什么？",
+                options: [
+                    { text: "读书写字，沉浸在自己的世界里", character: "daiyu" },
+                    { text: "约朋友逛街吃饭，热热闹闹", character: "xiangyun" },
+                    { text: "打理生活，把家里收拾得井井有条", character: "xiren" },
+                    { text: "研究新事物，提升自己的能力", character: "tanchun" }
+                ]
+            },
+            {
+                question: "有人在背后议论你，你知道后会？",
+                options: [
+                    { text: "非常在意，反复想自己哪里不好", character: "daiyu" },
+                    { text: "身正不怕影子斜，随他们说去", character: "xiangyun" },
+                    { text: "不动声色，暗中摸清情况再应对", character: "baochai" },
+                    { text: "找机会反击，让对方知道厉害", character: "xifeng" }
+                ]
+            },
+            {
+                question: "面对喜欢的人，你会如何表达？",
+                options: [
+                    { text: "藏在心里，试探对方心意", character: "daiyu" },
+                    { text: "大方直接，喜欢就主动靠近", character: "xiangyun" },
+                    { text: "默默付出，用行动证明心意", character: "xiren" },
+                    { text: "保持姿态，等对方来主动", character: "baochai" }
+                ]
+            },
+            {
+                question: "你认为人生最重要的是？",
+                options: [
+                    { text: "真心相待，得一知己足矣", character: "baoyu" },
+                    { text: "事业有成，活出自身价值", character: "tanchun" },
+                    { text: "平安顺遂，安稳度过一生", character: "xiren" },
+                    { text: "精神富足，灵魂自由高贵", character: "miaoyu" }
+                ]
+            }
+        ];
+
+        // 人物结果数据
+        const characters = {
+            daiyu: {
+                name: "林黛玉",
+                poem: "娴静时如姣花照水，行动处似弱柳扶风",
+                desc: "你敏感细腻，才情出众，有着极高的精神追求。外表清冷孤傲，内心却柔软深情，对认定的人倾尽真心。你不喜世俗客套，追求纯粹的知己之情，看似柔弱实则风骨凛然，宁为玉碎不为瓦全。"
+            },
+            baochai: {
+                name: "薛宝钗",
+                poem: "淡极始知花更艳，任是无情也动人",
+                desc: "你端庄周全，通透练达，总能把人际关系处理得恰到好处。你心性沉稳，格局开阔，不纠结于小事，懂得顾全大局。外表温和圆融，内心自有原则与坚守，是让人信赖的依靠。"
+            },
+            xifeng: {
+                name: "王熙凤",
+                poem: "机关算尽太聪明，反算了卿卿性命",
+                desc: "你精明强干，气场十足，天生的领导者与管理者。你反应敏捷，手腕凌厉，能把复杂事务打理得井井有条。你好胜心强，享受掌控一切的感觉，既有杀伐决断的魄力，也有八面玲珑的圆滑。"
+            },
+            xiangyun: {
+                name: "史湘云",
+                poem: "英豪阔大宽宏量，从未将儿女私情略萦心上",
+                desc: "你爽朗洒脱，乐观豁达，是朋友眼中的小太阳。你不爱计较，不拘小节，哪怕身处困境也能苦中作乐。你真诚坦荡，没有弯弯绕绕的心思，和你相处永远轻松又舒服。"
+            },
+            tanchun: {
+                name: "贾探春",
+                poem: "才自精明志自高，生于末世运偏消",
+                desc: "你清醒独立，志向高远，有不输男子的才干与心气。你眼光长远，行事果决，不满足于安稳现状，总想凭自己闯出一番天地。你自尊心强，有底线有原则，从不妄自菲薄。"
+            },
+            miaoyu: {
+                name: "妙玉",
+                poem: "气质美如兰，才华阜比仙",
+                desc: "你清高孤傲，遗世独立，有着自己的精神洁癖。你不喜欢世俗的热闹与应酬，更享受一个人的独处时光。你品味独特，追求极致的精神世界，懂你的人自然懂，不懂的人也不必解释。"
+            },
+            xiren: {
+                name: "花袭人",
+                poem: "温柔和顺，似桂如兰",
+                desc: "你温柔体贴，细致周到，总能把身边人照顾得无微不至。你踏实稳重，责任心强，做事靠谱让人放心。你不张扬不抢风头，却在默默付出中赢得所有人的认可与信赖。"
+            },
+            baoyu: {
+                name: "贾宝玉",
+                poem: "无故寻愁觅恨，有时似傻如狂",
+                desc: "你率性纯真，叛逆浪漫，讨厌世俗的条条框框。你看重情义，对身边人温柔包容，不喜欢功利与算计。你有自己的精神世界，不被旁人眼光左右，活得随性又通透。"
+            }
+        };
+
+        let currentQuestion = 0;
+        let scores = {};
+
+        // 初始化分数
+        function initScores() {
+            scores = {
+                daiyu: 0,
+                baochai: 0,
+                xifeng: 0,
+                xiangyun: 0,
+                tanchun: 0,
+                miaoyu: 0,
+                xiren: 0,
+                baoyu: 0
+            };
+        }
+
+        // 开始测试
+        function startQuiz() {
+            initScores();
+            currentQuestion = 0;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        // 渲染题目
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question-text').textContent = q.question;
+            document.getElementById('current-num').textContent = currentQuestion + 1;
+            
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = Math.round(progress) + '%';
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-lg border border-honglou-red/20 bg-white/50 option-hover hover:border-honglou-red/50 hover:bg-white';
+                btn.innerHTML = `<span class="text-honglou-red font-semibold mr-2">${String.fromCharCode(65 + index)}.</span>${opt.text}`;
+                btn.onclick = () => selectOption(opt.character);
+                container.appendChild(btn);
+            });
+        }
+
+        // 选择选项
+        function selectOption(character) {
+            scores[character]++;
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                // 加个淡入效果
+                const quizScreen = document.getElementById('quiz-screen');
+                quizScreen.classList.remove('fade-in');
+                setTimeout(() => {
+                    renderQuestion();
+                    quizScreen.classList.add('fade-in');
+                }, 150);
+            } else {
+                showResult();
+            }
+        }
+
+        // 显示结果
+        function showResult() {
+            // 找出最高分
+            let maxScore = 0;
+            let resultChar = '';
+            
+            for (const [char, score] of Object.entries(scores)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    resultChar = char;
+                }
+            }
+
+            const result = characters[resultChar];
+            const matchPercent = Math.round((maxScore / questions.length) * 100) + 5;
+
+            document.getElementById('result-name').textContent = result.name;
+            document.getElementById('result-poem').textContent = result.poem;
+            document.getElementById('result-desc').textContent = result.desc;
+            document.getElementById('match-score').textContent = matchPercent + '%';
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+        }
+
+        // 重新测试
+        function restartQuiz() {
+            document.getElementById('result-screen').classList.add('hidden');
+            startQuiz();
+        }
+
+        // 分享提示
+        function shareResult() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '你最像红楼梦里的谁',
+                    text: `我测出是${document.getElementById('result-name').textContent}，快来测测你是谁！`,
+                    url: window.location.href
+                });
+            } else {
+                alert('截图保存图片，即可分享给好友哦～');
+            }
+        }
+    </script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
